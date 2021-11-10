@@ -12,55 +12,52 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var questionLabel: UILabel!
     
+    //if文のところのエラー回避
     var currentQuestionNum: Int = 0
     
-//    let questions: [[String: Any]] = [
-//        [
-//            "question": "iPhoneアプリを開発する統合環境はZcodeである",
-//            "answer": false
-//        ],
-//        [
-//            "question": "Xcode画面の右側にはユーティリティーズがある",
-//            "answer": true
-//        ],
-//        [
-//            "question": "UILabelは文字列を表示する際に利用する",
-//            "answer": true
-//        ]
-//    ]
+    var questions: [[String: Any]] = []
     
     func showQuestion() {
-        // question = 配列の名前[配列番号] となっている
-        let question = questions[currentQuestionNum]
-        // dictionaryのときの､特殊な呼び出し方｡ questionの､問題の内容だけ取り出している
-        if let que = question["question"] as? String {
-            questionLabel.text = que
+        // UserDefaultsを使って、iPhone端末内に保存されている問題を取り出し、questions定数に格納()
+        let ud = UserDefaults.standard
+        let questions:[[String: Any]] = ud.object(forKey: "questions") as! [[String: Any]]
+        
+        // question dictionaryの数がquestionの数(0から開始)よりも大きければ
+        if (questions.count > currentQuestionNum) {
+            let question = questions[currentQuestionNum]
+            // questionLabelにquestion文を表示
+            if let que = question["question"] as? String {
+                questionLabel.text = que
+            }
+        }
+        else {
+            //問題がない場合の処理
+            questionLabel.text = "問題がありませんので､作成しましょう!"
         }
     }
     
     func checkAnswer(yourAnswer: Bool) {
-    
-        let question = questions[currentQuestionNum]
-
-        if let ans = question["answer"] as? Bool {
-
-            if yourAnswer == ans {
-                currentQuestionNum += 1
-                showAlert(message: "正解!")
-            } else {
-                //何も書かない=currentQuestionNumが変わらないので､同じ問題が再び表示される｡
-                showAlert(message: "不正解…")
-            }
-        } else {
-            print("答えが入ってません")
-            return
-        }
+        // UserDefaultsを使って、iPhone端末内に保存されている問題を取り出し、questions定数に格納
+        let ud = UserDefaults.standard
+        let questions: [[String: Any]] = ud.object(forKey: "questions") as! [[String : Any]]
         
-        if currentQuestionNum >= questions.count {
-            currentQuestionNum = 0
+        if (questions.count > currentQuestionNum) {
+            // question変数に現在の問題を格納
+            let question = questions[currentQuestionNum]
+            
+            // questionsのanswerに登録されている情報がBoolean型かチェック
+            if let ans = question["answer"] as? Bool {
+                
+                if yourAnswer == ans {
+                    // 次の問題に進む
+                    currentQuestionNum += 1
+                    showAlert(message: "正解!")
+                }
+                else {
+                    showAlert(message: "不正解...")
+                }
+            }
         }
-
-        showQuestion()
     }
     
     func showAlert(message: String) {
@@ -72,6 +69,11 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        let ud = UserDefaults.standard
+        if (ud.object(forKey: "questions") == nil) {
+                    ud.set([], forKey: "questions")
+                }
+        
         showQuestion()
     }
 
@@ -81,6 +83,15 @@ class ViewController: UIViewController {
     
     @IBAction func tappedYesButton(_ sender: UIButton) {
         checkAnswer(yourAnswer: true)
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        questions = []
+        let userDefaults = UserDefaults.standard
+        if userDefaults.object(forKey: "questions") != nil {
+            questions = userDefaults.object(forKey: "questions") as! [[String: Any]]
+        }
+        showQuestion()
     }
     
 }
