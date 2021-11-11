@@ -22,7 +22,7 @@ class ViewController: UIViewController {
         let ud = UserDefaults.standard
         let questions:[[String: Any]] = ud.object(forKey: "questions") as! [[String: Any]]
         
-        // question dictionaryの数がquestionの数(0から開始)よりも大きければ
+//         question dictionaryの数がquestionの数(0から開始)よりも大きければ
         if (questions.count > currentQuestionNum) {
             let question = questions[currentQuestionNum]
             // questionLabelにquestion文を表示
@@ -34,6 +34,7 @@ class ViewController: UIViewController {
             //問題がない場合の処理
             questionLabel.text = "問題がありませんので､作成しましょう!"
         }
+        
     }
     
     func checkAnswer(yourAnswer: Bool) {
@@ -50,12 +51,14 @@ class ViewController: UIViewController {
                 
                 if yourAnswer == ans {
                     // 次の問題に進む
-                    currentQuestionNum += 1
                     showAlert(message: "正解!")
+                    currentQuestionNum += 1
+                    showQuestion()
                 }
                 else {
                     showAlert(message: "不正解...")
                 }
+                
             }
         }
     }
